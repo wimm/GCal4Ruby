@@ -1,5 +1,9 @@
 #!/usr/bin/ruby
 
+# Prefix LOAD_PATH with lib sub-directory to ensure we're
+# testing the intended version.
+$:.unshift File.join(File.dirname(__FILE__), "..", "lib")
+
 require 'rubygems'
 require 'gcal4ruby'
 include GCal4Ruby
@@ -24,6 +28,7 @@ def tester
   calendar_test
   event_test
   event_recurrence_test
+  all_day_recurrence_test
 end
 
 def service_test
@@ -163,6 +168,47 @@ def event_recurrence_test
   puts "3. Delete Event"
   if event.delete
     successful 
+  else
+    failed
+  end
+end
+
+def all_day_recurrence_test
+  puts "---Starting All Day Recurrence Test---"
+
+  start_time = Time.now
+  end_time = start_time + 60*60*24
+  freq = {'weekly' => ['MO','TU']}
+
+  puts "1. Create All Day Recurring Event"
+  event = Event.new(@service)
+  event.calendar = @service.calendars[0]
+  event.title = "Test All Day Recurring Event"
+  event.content = "Test all day event content"
+  event.recurrence = Recurrence.new({:start_time => start_time, :end_time => end_time, :frequency => freq, :all_day => true})
+  if event.save
+    successful event.to_xml
+  else
+    failed("recurrence = "+event.recurrence.to_s)
+  end
+
+  puts "2. Validate returned event is an all day event"
+  if event.recurrence.all_day
+    successful
+  else
+    failed("recurrence = "+event.recurrence.to_s)
+  end
+
+  puts "3. Validate frequency of event"
+  if event.recurrence.frequency['weekly'] == ['MO','TU']
+    successful
+  else
+    failed("recurrence = "+event.recurrence.to_s)
+  end
+
+  puts "4. Delete Event"
+  if event.delete
+    successful
   else
     failed
   end
