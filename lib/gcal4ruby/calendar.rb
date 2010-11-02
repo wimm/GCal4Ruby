@@ -54,7 +54,10 @@ module GCal4Ruby
     <gCal:color value='#2952A3'></gCal:color>
     <gd:where rel='' label='' valueString='Oakland'></gd:where>
   </entry>"
-    
+
+    #The calendar title
+    attr_accessor :title
+
     #A short description of the calendar
     attr_accessor :summary
     
