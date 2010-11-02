@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
    s.name = %q{gcal4ruby}
-   s.version = "0.5.5"
+   s.version = "0.5.5.1"
    s.date = %q{2010-08-15}
    s.authors = ["Mike Reich"]
    s.email = %q{mike@seabourneconsulting.com}
