@@ -1,4 +1,8 @@
 #=CHANGELOG
+#==version 0.5.6
+#* Reformatted README. Thanks to SingAlong.
+#* Fixed recurrence time parsing when date only. Thanks to macovsky.
+#* Cleaned up gemspec.
 #==version 0.5.5 
 #* Fixed calendar::find method.  Thanks to AB <a.berezovskiy@gmail.com>.
 #* Improved recurrence handling.  Thanks to John Paul Narowski <jnarowski@gmail.com>.
