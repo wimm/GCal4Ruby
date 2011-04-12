@@ -27,7 +27,7 @@ class Time
     unless value.nil? || value.empty?
       if value.include?("T")
         d, h = value.split("T")
-        return Time.parse(d+" "+h.gsub("Z", ""))
+        return Time.parse(d+" "+h.to_s.gsub("Z", ""))
       else
         value = value.to_s
         return Time.parse("#{value[0..3]}-#{value[4..5]}-#{value[6..7]}")
