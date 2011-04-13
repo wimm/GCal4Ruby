@@ -35,9 +35,13 @@ Below are some common usage examples.  For more examples, check the documentatio
 		service = Service.new
     	service.authenticate("user@gmail.com", "password")
 
-2. Get Calendar List
+2. Get Calendar List for all calendars
 
     	calendars = service.calendars
+
+3. Get Calendar List for all calendars that the authenticated user has owner access level
+
+    	calendars = service.calendars(:only_owner_access_level => true)
 
 ###Calendar
 

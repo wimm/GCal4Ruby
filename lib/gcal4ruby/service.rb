@@ -38,8 +38,12 @@ module GCal4Ruby
   #2. Get Calendar List
   #    calendars = service.calendars
   #
+  #3. Get Calendar List that the authenticated user has owner access level to
+  #    calendars = service.calendars(:only_owner_access_level => true)
+  #
   class Service < GData4Ruby::Service
-    CALENDAR_LIST_FEED = 'http://www.google.com/calendar/feeds/default/allcalendars/full'
+    CALENDAR_LIST_FEED_ALL = 'http://www.google.com/calendar/feeds/default/allcalendars/full'
+    CALENDAR_LIST_FEED_OWNER = 'http://www.google.com/calendar/feeds/default/owncalendars/full'
     
     #Convenience attribute contains the currently authenticated account name
     attr_reader :account
@@ -77,12 +81,15 @@ module GCal4Ruby
     end
   
     #Returns an array of Calendar objects for each calendar associated with 
-    #the authenticated account.
-    def calendars
+    #the authenticated account.  An optional hash of options is the only parameter. The
+    #available options are:
+    #*:only_owner_access_level*:: A boolean flag that specifies whether to return only the list of calendars that the authenticated user has owner access to.    
+    def calendars(options={})
       if not @auth_token
          raise NotAuthenticated
       end
-      ret = send_request(GData4Ruby::Request.new(:get, CALENDAR_LIST_FEED, nil, {"max-results" => "10000"}))
+      feed_url = options[:only_owner_access_level] ? CALENDAR_LIST_FEED_OWNER : CALENDAR_LIST_FEED_ALL
+      ret = send_request(GData4Ruby::Request.new(:get, feed_url, nil, {"max-results" => "10000"}))
       cals = []
       REXML::Document.new(ret.body).root.elements.each("entry"){}.map do |entry|
         entry = GData4Ruby::Utils.add_namespaces(entry)
