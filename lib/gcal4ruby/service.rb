@@ -86,7 +86,7 @@ module GCal4Ruby
       if not @auth_token
          raise NotAuthenticated
       end
-      feed_url = options[:only_owner_access_level] ? GCal4Ruby::Calender::OWN_CALENDARS_FEED : GCal4Ruby::Calendar::ALL_CALENDARS_FEED
+      feed_url = options[:only_owner_access_level] ? GCal4Ruby::Calendar::OWN_CALENDARS_FEED : GCal4Ruby::Calendar::ALL_CALENDARS_FEED
       ret = send_request(GData4Ruby::Request.new(:get, feed_url, nil, {"max-results" => "10000"}))
       cals = []
       REXML::Document.new(ret.body).root.elements.each("entry"){}.map do |entry|
