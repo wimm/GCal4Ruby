@@ -42,8 +42,8 @@ module GCal4Ruby
   #attributes like you would any other object.  Be sure to save the calendar to write changes
   #to the Google Calendar service.
   class Calendar < GData4Ruby::GDataObject
-    CALENDAR_FEED = "http://www.google.com/calendar/feeds/default/owncalendars/full/"
-    CALENDAR_QUERY_FEED = "http://www.google.com/calendar/feeds/default/calendars/"
+    ALL_CALENDARS_FEED = 'https://www.google.com/calendar/feeds/default/allcalendars/full'
+    OWN_CALENDARS_FEED = 'https://www.google.com/calendar/feeds/default/owncalendars/full'
     CALENDAR_XML = "<entry xmlns='http://www.w3.org/2005/Atom' 
          xmlns:gd='http://schemas.google.com/g/2005' 
          xmlns:gCal='http://schemas.google.com/gCal/2005'>
@@ -154,7 +154,7 @@ module GCal4Ruby
     
     #Creates a new instance of the object
     def create
-      return service.send_request(GData4Ruby::Request.new(:post, CALENDAR_FEED, to_xml()))
+      return service.send_request(GData4Ruby::Request.new(:post, OWN_CALENDARS_FEED, to_xml()))
     end
     
     #Finds a Calendar based on a text query or by an id.  Parameters are:
@@ -171,7 +171,7 @@ module GCal4Ruby
         id = query[:id]
         puts "id passed, finding calendar by id" if service.debug
         puts "id = "+id if service.debug
-        d = service.send_request(GData4Ruby::Request.new(:get, CALENDAR_FEED+id, {"If-Not-Match" => "*"}))
+        d = service.send_request(GData4Ruby::Request.new(:get, "#{OWN_CALENDARS_FEED}/#{id}", {"If-Not-Match" => "*"}))
         puts d.inspect if service.debug
         if d
           return get_instance(service, d)

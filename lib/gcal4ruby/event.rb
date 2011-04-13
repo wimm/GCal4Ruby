@@ -77,7 +77,7 @@ module GCal4Ruby
   #to the Google Calendar service.
   
   class Event < GData4Ruby::GDataObject
-    EVENT_QUERY_FEED = "http://www.google.com/calendar/feeds/default/private/full/"
+    EVENT_QUERY_FEED = "https://www.google.com/calendar/feeds/default/private/full/"
     EVENT_XML = "<entry xmlns='http://www.w3.org/2005/Atom'
     xmlns:gd='http://schemas.google.com/g/2005'>
   <category scheme='http://schemas.google.com/g/2005#kind'

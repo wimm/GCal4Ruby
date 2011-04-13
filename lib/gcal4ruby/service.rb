@@ -42,8 +42,6 @@ module GCal4Ruby
   #    calendars = service.calendars(:only_owner_access_level => true)
   #
   class Service < GData4Ruby::Service
-    CALENDAR_LIST_FEED_ALL = 'http://www.google.com/calendar/feeds/default/allcalendars/full'
-    CALENDAR_LIST_FEED_OWNER = 'http://www.google.com/calendar/feeds/default/owncalendars/full'
     
     #Convenience attribute contains the currently authenticated account name
     attr_reader :account
@@ -66,7 +64,7 @@ module GCal4Ruby
     end
     
     def default_event_feed
-      return "http://www.google.com/calendar/feeds/#{@account}/private/full"
+      return "https://www.google.com/calendar/feeds/#{@account}/private/full"
     end
   
     # The authenticate method passes the username and password to google servers.  
@@ -88,7 +86,7 @@ module GCal4Ruby
       if not @auth_token
          raise NotAuthenticated
       end
-      feed_url = options[:only_owner_access_level] ? CALENDAR_LIST_FEED_OWNER : CALENDAR_LIST_FEED_ALL
+      feed_url = options[:only_owner_access_level] ? Calender::OWN_CALENDARS_FEED : Calendar::ALL_CALENDARS_FEED
       ret = send_request(GData4Ruby::Request.new(:get, feed_url, nil, {"max-results" => "10000"}))
       cals = []
       REXML::Document.new(ret.body).root.elements.each("entry"){}.map do |entry|
