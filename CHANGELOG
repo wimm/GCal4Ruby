@@ -1,4 +1,7 @@
 #=CHANGELOG
+#==version 0.5.7
+#* Support option to only get calendars with owner level access.
+#* Use https for all feeds.
 #==version 0.5.6
 #* Reformatted README. Thanks to SingAlong.
 #* Fixed recurrence time parsing when date only. Thanks to macovsky.
