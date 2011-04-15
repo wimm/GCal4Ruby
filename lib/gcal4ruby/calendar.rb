@@ -78,7 +78,10 @@ module GCal4Ruby
     
     #A flag indicating whether the calendar is editable by this account 
     attr_reader :editable
-    
+
+    #Timestamp when last updated
+    attr_reader :updated_at
+
     #Accepts a Service object and an optional attributes hash for initialization.  Returns the new Calendar 
     #if successful, otherwise raises the InvalidService error.
     def initialize(service, attributes = {})
@@ -88,6 +91,7 @@ module GCal4Ruby
       end
       @xml = CALENDAR_XML
       @service ||= service
+      @updated_at = nil
       @exists = false
       @title ||= ""
       @summary ||= ""
@@ -238,6 +242,8 @@ module GCal4Ruby
         case ele.name
           when "id"
           @id = ele.text.gsub("http://www.google.com/calendar/feeds/default/calendars/", "")
+          when "updated"
+          @updated_at = Time.xmlschema ele.text
           when 'summary'
           @summary = ele.text
           when "color"
