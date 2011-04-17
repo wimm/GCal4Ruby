@@ -62,11 +62,7 @@ module GCal4Ruby
       end    
       @check_public ||= true
     end
-    
-    def default_event_feed
-      return "https://www.google.com/calendar/feeds/#{@account}/private/full"
-    end
-  
+
     # The authenticate method passes the username and password to google servers.  
     # If authentication succeeds, returns true, otherwise raises the AuthenticationFailed error.
     def authenticate(username, password, service='cl')
@@ -103,7 +99,7 @@ module GCal4Ruby
       if not @auth_token
          raise NotAuthenticated
       end
-      ret = send_request(GData4Ruby::Request.new(:get, default_event_feed, nil, {"max-results" => "10000"}))
+      ret = send_request(GData4Ruby::Request.new(:get, Event.event_feed_uri(@account), nil, {"max-results" => "10000"}))
       events = []
       REXML::Document.new(ret.body).root.elements.each("entry"){}.map do |entry|
         entry = GData4Ruby::Utils.add_namespaces(entry)

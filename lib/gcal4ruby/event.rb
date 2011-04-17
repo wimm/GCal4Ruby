@@ -94,12 +94,22 @@ module GCal4Ruby
   <gd:when startTime=''
     endTime=''></gd:when>
 </entry>"
+
     STATUS = {:confirmed => "http://schemas.google.com/g/2005#event.confirmed",
               :tentative => "http://schemas.google.com/g/2005#event.tentative",
               :cancelled => "http://schemas.google.com/g/2005#event.canceled"}
               
     TRANSPARENCY = {:free => "http://schemas.google.com/g/2005#event.transparent",
                     :busy => "http://schemas.google.com/g/2005#event.opaque"}
+
+    # The URI of a representation of an event feed takes the following form:
+    #   https://www.google.com/calendar/feeds/userID/visibility/projection
+    # Returns a feed with 'private' visibility and 'full' projection.
+    # The Calendar ID can be used in place of the User ID to return events
+    # from a specific calendar.
+    def self.event_feed_uri(user_id)
+      "https://www.google.com/calendar/feeds/#{user_id}/private/full"
+    end
     
     #The content for the event
     attr_accessor :content
@@ -354,7 +364,7 @@ module GCal4Ruby
       end
       return false
     end
-    
+
     #Finds an Event based on a text query or by an id.  Parameters are:
     #*service*::  A valid Service object to search.
     #*query*:: either a string containing a text query to search by, or a hash containing an +id+ key with an associated id to find, or a +query+ key containint a text query to search for, or a +title+ key containing a title to search.  All searches are case insensitive.
@@ -383,9 +393,9 @@ module GCal4Ruby
           args["q"] = CGI::escape(query) if query != ''
         end
         if args[:calendar]
-          cal = args[:calendar].is_a?(Calendar) ? args[:calendar] : Calendar.find(service, {:id => args[:calendar]})
+          feed_uri = args[:calendar].is_a?(Calendar) ? args[:calendar].content_uri : self.event_feed_uri(args[:calendar])
           args.delete(:calendar)
-          ret = service.send_request(GData4Ruby::Request.new(:get, cal.content_uri, nil, nil, args))
+          ret = service.send_request(GData4Ruby::Request.new(:get, feed_uri, nil, nil, args))
           xml = REXML::Document.new(ret.body).root
           xml.elements.each("entry") do |e|
             results << get_instance(service, e)
