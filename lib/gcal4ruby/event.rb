@@ -379,10 +379,11 @@ module GCal4Ruby
         id = query[:id]
         puts "id passed, finding event by id" if service.debug
         puts "id = "+id if service.debug
-        d = service.send_request(GData4Ruby::Request.new(:get, "http://www.google.com/calendar/feeds/"+id, {"If-Not-Match" => "*"}))
-        puts d.inspect if service.debug
-        if d
-          return get_instance(service, d)
+        client = nil
+        client = service.send_request(GData4Ruby::Request.new(:get, "http://www.google.com/calendar/feeds/"+id, {"If-Not-Match" => "*"}))
+        puts client.inspect if service.debug
+        if client
+          return get_instance(service, client)
         end
       else
         results = []
@@ -395,15 +396,15 @@ module GCal4Ruby
         if args[:calendar]
           feed_uri = args[:calendar].is_a?(Calendar) ? args[:calendar].content_uri : self.event_feed_uri(args[:calendar])
           args.delete(:calendar)
-          ret = service.send_request(GData4Ruby::Request.new(:get, feed_uri, nil, nil, args))
-          xml = REXML::Document.new(ret.body).root
+          client = service.send_request(GData4Ruby::Request.new(:get, feed_uri, nil, nil, args))
+          xml = REXML::Document.new(client.response).root
           xml.elements.each("entry") do |e|
             results << get_instance(service, e)
           end
         else
           service.calendars.each do |cal|
-            ret = service.send_request(GData4Ruby::Request.new(:get, cal.content_uri, nil, nil, args))
-            xml = REXML::Document.new(ret.body).root
+            client = service.send_request(GData4Ruby::Request.new(:get, cal.content_uri, nil, nil, args))
+            xml = REXML::Document.new(client.response).root
             xml.elements.each("entry") do |e|
               results << get_instance(service, e)
             end
@@ -437,14 +438,14 @@ module GCal4Ruby
       end
     end
 
-    def self.get_instance(service, d)
-      if d.is_a? Net::HTTPOK
-        xml = REXML::Document.new(d.read_body).root
+    def self.get_instance(service, client)
+      if (client.respond_to? :response_header) && (client.response_header.status == 200)
+        xml = REXML::Document.new(client.response).root
         if xml.name == 'feed'
           xml = xml.elements.each("entry"){}[0]
         end
       else
-        xml = d
+        xml = client ## xml node
       end
       ele = GData4Ruby::Utils::add_namespaces(xml)
       e = Event.new(service)

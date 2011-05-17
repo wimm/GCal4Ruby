@@ -83,9 +83,10 @@ module GCal4Ruby
          raise NotAuthenticated
       end
       feed_url = options[:only_owner_access_level] ? GCal4Ruby::Calendar::OWN_CALENDARS_FEED : GCal4Ruby::Calendar::ALL_CALENDARS_FEED
-      ret = send_request(GData4Ruby::Request.new(:get, feed_url, nil, {"max-results" => "10000"}))
+      client = nil
+      client = send_request(GData4Ruby::Request.new(:get, feed_url, nil, {"max-results" => "10000"}))
       cals = []
-      REXML::Document.new(ret.body).root.elements.each("entry"){}.map do |entry|
+      REXML::Document.new(client.response).root.elements.each("entry"){}.map do |entry|
         entry = GData4Ruby::Utils.add_namespaces(entry)
         cal = Calendar.new(self)
         cal.load(entry.to_s)
@@ -99,9 +100,10 @@ module GCal4Ruby
       if not @auth_token
          raise NotAuthenticated
       end
-      ret = send_request(GData4Ruby::Request.new(:get, Event.event_feed_uri(@account), nil, {"max-results" => "10000"}))
+      client = nil
+      client = send_request(GData4Ruby::Request.new(:get, Event.event_feed_uri(@account), nil, {"max-results" => "10000"}))
       events = []
-      REXML::Document.new(ret.body).root.elements.each("entry"){}.map do |entry|
+      REXML::Document.new(client.response).root.elements.each("entry"){}.map do |entry|
         entry = GData4Ruby::Utils.add_namespaces(entry)
         event = Event.new(self)
         event.load(entry.to_s)

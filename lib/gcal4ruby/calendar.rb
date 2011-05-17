@@ -120,8 +120,9 @@ module GCal4Ruby
     #Returns an array of Event objects corresponding to each event in the calendar.
     def events
       events = []
-      ret = @service.send_request(GData4Ruby::Request.new(:get, @content_uri))
-      REXML::Document.new(ret.body).root.elements.each("entry"){}.map do |entry|
+      client = nil
+      client = @service.send_request(GData4Ruby::Request.new(:get, @content_uri))
+      REXML::Document.new(client.response).root.elements.each("entry"){}.map do |entry|
         entry = GData4Ruby::Utils.add_namespaces(entry)
         e = Event.new(service)
         if e.load(entry.to_s)
@@ -135,8 +136,9 @@ module GCal4Ruby
     #Saves the calendar.
     def save
       public = @public
-      ret = super
-      return ret if public == @public
+      client = nil
+      client = super
+      return client if public == @public
       if public
         puts 'setting calendar to public' if service.debug
         rule = GData4Ruby::ACL::AccessRule.new(service, self)
@@ -175,10 +177,11 @@ module GCal4Ruby
         id = query[:id]
         puts "id passed, finding calendar by id" if service.debug
         puts "id = "+id if service.debug
-        d = service.send_request(GData4Ruby::Request.new(:get, "#{OWN_CALENDARS_FEED}/#{id}", {"If-Not-Match" => "*"}))
-        puts d.inspect if service.debug
-        if d
-          return get_instance(service, d)
+        client = nil
+        client = service.send_request(GData4Ruby::Request.new(:get, "#{OWN_CALENDARS_FEED}/#{id}", {"If-Not-Match" => "*"}))
+        puts client.inspect if service.debug
+        if client.error.empty?
+          return get_instance(service, client)
         end
       else
         #fugly, but Google doesn't provide a way to query the calendar feed directly
@@ -265,16 +268,16 @@ module GCal4Ruby
       
       if @service.check_public
         puts "Getting ACL Feed" if @service.debug
-        
+        client = nil
         #rescue error on shared calenar ACL list access
         begin 
-          ret = @service.send_request(GData4Ruby::Request.new(:get, @acl_uri))
+          client = @service.send_request(GData4Ruby::Request.new(:get, @acl_uri))
         rescue Exception => e
           puts "ACL Feed Get Failed: #{e.inspect}" if @service.debug
           @public = false
           return true
         end
-        r = REXML::Document.new(ret.read_body)
+        r = REXML::Document.new(client.response)
         r.root.elements.each("entry") do |ele|
           e = GData4Ruby::ACL::AccessRule.new(service, self)
           ele = GData4Ruby::Utils.add_namespaces(ele)
@@ -357,14 +360,14 @@ module GCal4Ruby
     end
     
     private
-    def self.get_instance(service, d)
-      if d.is_a? Net::HTTPOK
-        xml = REXML::Document.new(d.read_body).root
+    def self.get_instance(service, client)
+      if (client.respond_to? :response_header) && (client.response_header.status == 200)
+        xml = REXML::Document.new(client.response).root
         if xml.name == 'feed'
           xml = xml.elements.each("entry"){}[0]
         end
       else
-        xml = d
+        xml = client ## xml node
       end
       ele = GData4Ruby::Utils::add_namespaces(xml)
       cal = Calendar.new(service)
